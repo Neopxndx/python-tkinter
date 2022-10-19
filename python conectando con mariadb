@@ -1,0 +1,50 @@
+from tkinter import *
+from tkinter import ttk
+import mariadb
+
+class Alumn:
+    def __init__(self, window):
+        self.window = window
+        self.window.title('Ingreso de Alumnos')
+
+        #Creando un marco en donde contendrá todo lo de la interfaz
+        marco = LabelFrame(self.window, text= 'Alumno')
+        marco.grid(row = 0, column = 0, columnspan = 5, pady = 20)
+
+        Label(marco, text = "Bienvenido Alumno").grid(row = 0, column = 0)
+        Label(marco, text = "Nombre: ").grid(row = 2, column = 2)
+        Entry(marco).grid(row=2, column = 3)
+        Label(marco, text = "Código: ").grid(row = 3, column = 2)
+        Entry(marco).grid(row=3, column = 3)
+
+    #creamos un boton y de parametro lleva el master (dentro de donde estará)
+        ttk.Button(marco, text = "Enviar").grid(row = 4, column = 2, sticky=W+E) 
+
+    def consultAlum(self, query):
+        #vamos a probar la conexión de datos
+        try:
+            conexion = mariadb.connect(
+                host = 'localhost',
+                user = 'root',
+                password = '',
+                database = 'escuela'
+            )
+        except mariadb.Error as e:
+            print(f'Error al tratar de conectarse a la Base De Datos {e}')
+        
+        #vamos a obtener los datos
+        curs = conexion.cursor()
+        curs.execute(query) #ejecutando una consulta, de parametro recibe el query 
+        return curs
+
+    def showData(self):
+        curs = self.consultAlum('SELECT `nombre`,`codigo` FROM `alumnos`') #le pasamos la consulta 
+        #vamos a mostrar los datos
+        for (nombre, codigo) in curs:
+            print(nombre, codigo)
+
+if __name__ == '__main__':
+    window = Tk()
+    app = Alumn(window)
+    app.showData()
+    window.mainloop()
